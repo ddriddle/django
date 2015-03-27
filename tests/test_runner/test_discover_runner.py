@@ -49,9 +49,10 @@ class DiscoverRunnerTest(TestCase):
 
         self.assertEqual(count, 1)
 
-    # this test fails if unittest2 is installed from PyPI on Python 2.6
+    # this test fails if unittest2 is installed from PyPI on Python 2.x
     # refs https://code.djangoproject.com/ticket/20437
-    @expectedFailureIf(sys.version_info < (2, 7) and unittest2)
+    # refs https://code.djangoproject.com/ticket/24548
+    @expectedFailureIf(sys.version_info <= (3, ) and unittest2)
     def test_dotted_test_method_vanilla_unittest(self):
         count = DiscoverRunner().build_suite(
             ["test_discovery_sample.tests_sample.TestVanillaUnittest.test_sample"],
