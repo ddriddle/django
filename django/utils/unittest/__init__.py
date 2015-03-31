@@ -30,51 +30,47 @@ import sys
 
 # Django hackery to load the appropriate version of unittest
 
-try:
-    # check the system path first
-    from unittest2 import *
-except ImportError:
-    if sys.version_info >= (2,7):
-        # unittest2 features are native in Python 2.7
-        from unittest import *
+if sys.version_info >= (2,7):
+    # unittest2 features are native in Python 2.7
+    from unittest import *
+else:
+    # otherwise use our bundled version
+    __all__ = ['TestResult', 'TestCase', 'TestSuite',
+               'TextTestRunner', 'TestLoader', 'FunctionTestCase', 'main',
+               'defaultTestLoader', 'SkipTest', 'skip', 'skipIf', 'skipUnless',
+               'expectedFailure', 'TextTestResult', '__version__', 'collector']
+
+    __version__ = '0.5.1'
+
+    # Expose obsolete functions for backwards compatibility
+    __all__.extend(['getTestCaseNames', 'makeSuite', 'findTestCases'])
+
+
+    from django.utils.unittest.collector import collector
+    from django.utils.unittest.result import TestResult
+    from django.utils.unittest.case import \
+        TestCase, FunctionTestCase, SkipTest, skip, skipIf,\
+        skipUnless, expectedFailure
+
+    from django.utils.unittest.suite import BaseTestSuite, TestSuite
+    from django.utils.unittest.loader import \
+        TestLoader, defaultTestLoader, makeSuite, getTestCaseNames,\
+        findTestCases
+
+    from django.utils.unittest.main import TestProgram, main, main_
+    from django.utils.unittest.runner import TextTestRunner, TextTestResult
+
+    try:
+        from django.utils.unittest.signals import\
+            installHandler, registerResult, removeResult, removeHandler
+    except ImportError:
+        # Compatibility with platforms that don't have the signal module
+        pass
     else:
-        # otherwise use our bundled version
-        __all__ = ['TestResult', 'TestCase', 'TestSuite',
-                   'TextTestRunner', 'TestLoader', 'FunctionTestCase', 'main',
-                   'defaultTestLoader', 'SkipTest', 'skip', 'skipIf', 'skipUnless',
-                   'expectedFailure', 'TextTestResult', '__version__', 'collector']
+        __all__.extend(['installHandler', 'registerResult', 'removeResult',
+                        'removeHandler'])
 
-        __version__ = '0.5.1'
+    # deprecated
+    _TextTestResult = TextTestResult
 
-        # Expose obsolete functions for backwards compatibility
-        __all__.extend(['getTestCaseNames', 'makeSuite', 'findTestCases'])
-
-
-        from django.utils.unittest.collector import collector
-        from django.utils.unittest.result import TestResult
-        from django.utils.unittest.case import \
-            TestCase, FunctionTestCase, SkipTest, skip, skipIf,\
-            skipUnless, expectedFailure
-
-        from django.utils.unittest.suite import BaseTestSuite, TestSuite
-        from django.utils.unittest.loader import \
-            TestLoader, defaultTestLoader, makeSuite, getTestCaseNames,\
-            findTestCases
-
-        from django.utils.unittest.main import TestProgram, main, main_
-        from django.utils.unittest.runner import TextTestRunner, TextTestResult
-
-        try:
-            from django.utils.unittest.signals import\
-                installHandler, registerResult, removeResult, removeHandler
-        except ImportError:
-            # Compatibility with platforms that don't have the signal module
-            pass
-        else:
-            __all__.extend(['installHandler', 'registerResult', 'removeResult',
-                            'removeHandler'])
-
-        # deprecated
-        _TextTestResult = TextTestResult
-
-        __unittest = True
+    __unittest = True
